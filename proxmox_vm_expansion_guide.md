@@ -6,7 +6,7 @@
 - **Motherboard**: Gigabyte B650M K
 - **CPU**: AMD Ryzen 5 7600
 - **GPU**: MSI RX6800 (with GPU passthrough)
-- **RAM**: 32GB (upgrading to 64GB)
+- **RAM**: 64GB
 - **PSU**: 650W
 - **Storage**:
   - 1TB NVMe SSD
