@@ -16,7 +16,7 @@ Successfully deployed Plex in Docker container on Ubuntu Server VM with storage 
 - **Motherboard**: Gigabyte B650M K
 - **Processor**: AMD Ryzen 5 7600
 - **GPU**: MSI RX6800 (with GPU passthrough to desktop VM)
-- **RAM**: 32GB (expandable to 64GB)
+- **RAM**: 64GB
 - **PSU**: 650W
 - **Storage**: Multiple SSDs and HDDs for different purposes
 
