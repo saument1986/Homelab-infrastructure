@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  nessus:
+    container_name: nessus
+    image: tenableofficial/nessus:latest
+    restart: unless-stopped
+    environment:
+      - ACTIVATION_CODE=${NESSUS_ACTIVATION_CODE:-}
+      - USERNAME=${NESSUS_USERNAME:-admin}
+      - PASSWORD=${NESSUS_PASSWORD:-}
+      - AUTO_UPDATE=${AUTO_UPDATE:-all}
+      - LINKING_KEY=${LINKING_KEY:-}
+      - SCANNER_NAME=${SCANNER_NAME:-nessus-scanner}
+    ports:
+      - "8834:8834"
+    volumes:
+      - nessus_data:/opt/nessus
+      - ./logs:/opt/nessus/var/nessus/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:8834/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  nessus_data:
+    driver: local
+
+# Using default Docker bridge network
