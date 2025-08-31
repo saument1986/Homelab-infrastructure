@@ -1,0 +1,107 @@
+<!--
+  Suricata decoders for Wazuh integration
+  Place in: /opt/wazuh-docker/config/wazuh_cluster/custom/decoders/
+-->
+
+<decoder name="suricata-eve">
+  <prematch>^{"timestamp":</prematch>
+</decoder>
+
+<decoder name="suricata-alert">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"alert"</regex>
+</decoder>
+
+<decoder name="suricata-alert-details">
+  <parent>suricata-alert</parent>
+  <regex>"signature":"([^"]+)".*"signature_id":(\d+).*"gid":(\d+).*"rev":(\d+).*"severity":(\d+).*"category":"([^"]+)"</regex>
+  <order>signature,signature_id,gid,rev,severity,category</order>
+</decoder>
+
+<decoder name="suricata-src-dst">
+  <parent>suricata-alert</parent>
+  <regex>"src_ip":"([^"]+)".*"src_port":(\d+).*"dest_ip":"([^"]+)".*"dest_port":(\d+).*"proto":"([^"]+)"</regex>
+  <order>srcip,srcport,dstip,dstport,proto</order>
+</decoder>
+
+<decoder name="suricata-flow">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"flow"</regex>
+</decoder>
+
+<decoder name="suricata-flow-details">
+  <parent>suricata-flow</parent>
+  <regex>"src_ip":"([^"]+)".*"dest_ip":"([^"]+)".*"proto":"([^"]+)".*"app_proto":"([^"]+)"</regex>
+  <order>srcip,dstip,proto,app_proto</order>
+</decoder>
+
+<decoder name="suricata-dns">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"dns"</regex>
+</decoder>
+
+<decoder name="suricata-dns-query">
+  <parent>suricata-dns</parent>
+  <regex>"rrname":"([^"]+)".*"rrtype":"([^"]+)"</regex>
+  <order>dns_query,dns_type</order>
+</decoder>
+
+<decoder name="suricata-http">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"http"</regex>
+</decoder>
+
+<decoder name="suricata-http-details">
+  <parent>suricata-http</parent>
+  <regex>"hostname":"([^"]+)".*"url":"([^"]+)".*"http_method":"([^"]+)".*"status":(\d+)</regex>
+  <order>hostname,url,http_method,http_status</order>
+</decoder>
+
+<decoder name="suricata-tls">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"tls"</regex>
+</decoder>
+
+<decoder name="suricata-tls-details">
+  <parent>suricata-tls</parent>
+  <regex>"subject":"([^"]+)".*"issuerdn":"([^"]+)".*"version":"([^"]+)"</regex>
+  <order>tls_subject,tls_issuer,tls_version</order>
+</decoder>
+
+<decoder name="suricata-ssh">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"ssh"</regex>
+</decoder>
+
+<decoder name="suricata-ssh-details">
+  <parent>suricata-ssh</parent>
+  <regex>"client":"([^"]+)".*"server":"([^"]+)"</regex>
+  <order>ssh_client,ssh_server</order>
+</decoder>
+
+<decoder name="suricata-fileinfo">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"fileinfo"</regex>
+</decoder>
+
+<decoder name="suricata-fileinfo-details">
+  <parent>suricata-fileinfo</parent>
+  <regex>"filename":"([^"]+)".*"size":(\d+).*"md5":"([^"]+)"</regex>
+  <order>filename,filesize,file_md5</order>
+</decoder>
+
+<decoder name="suricata-stats">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"stats"</regex>
+</decoder>
+
+<decoder name="suricata-anomaly">
+  <parent>suricata-eve</parent>
+  <regex>"event_type":"anomaly"</regex>
+</decoder>
+
+<decoder name="suricata-anomaly-details">
+  <parent>suricata-anomaly</parent>
+  <regex>"anomaly":"([^"]+)".*"layer":"([^"]+)"</regex>
+  <order>anomaly_type,anomaly_layer</order>
+</decoder>

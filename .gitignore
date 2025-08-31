@@ -6,6 +6,7 @@
 # Environment files with secrets
 .env
 *.env
+!*.env.template
 
 # Docker volumes and data
 **/data/
@@ -34,3 +35,26 @@ Thumbs.db
 *.backup
 *.bak
 *.old
+
+# Certificates and keys
+*.pem
+*.key
+*.crt
+*.cert
+**/certs.yml
+**/wazuh_indexer_ssl_certs/
+cookies.txt
+
+# Application specific data
+**/asp/
+**/Sentry/
+**/etc-pihole/
+**/etc-dnsmasq.d/
+
+# Database files
+*.db
+*.db-*
+*.sqlite*
+
+# Media covers and thumbnails
+**/MediaCover/

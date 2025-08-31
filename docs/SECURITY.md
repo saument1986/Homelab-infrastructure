@@ -2,7 +2,16 @@
 
 ## Overview
 
-This document details the security configurations, monitoring rules, and defensive measures implemented across the homelab infrastructure.
+This document details the security configurations, monitoring rules, and defensive measures implemented across the homelab infrastructure. The security stack includes Wazuh SIEM for centralized monitoring, Suricata IDS for network intrusion detection, Pi-hole for DNS filtering, Nessus for vulnerability assessment, and Slack for real-time alerting.
+
+## Security Architecture
+
+### Multi-Layer Defense Strategy
+- **Network Layer**: Suricata IDS monitors all network traffic for threats
+- **DNS Layer**: Pi-hole blocks malicious domains and detects tunneling
+- **Host Layer**: Wazuh agents monitor system activity and file integrity
+- **Application Layer**: Web attack detection and container security monitoring
+- **Alerting Layer**: Slack integration for immediate threat notifications
 
 ## Wazuh SIEM Configuration
 
@@ -72,7 +81,137 @@ This document details the security configurations, monitoring rules, and defensi
   <log_format>syslog</log_format>
   <location>/var/log/external/nessus/nessusd.messages</location>
 </localfile>
+<!-- Suricata IDS Integration -->
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/external/suricata/eve.json</location>
+</localfile>
+
+<localfile>
+  <log_format>syslog</log_format>
+  <location>/var/log/external/suricata/fast.log</location>
+</localfile>
+
+<!-- Slack Integration -->
+<integration>
+  <name>slack</name>
+  <hook_url>YOUR_WEBHOOK_URL</hook_url>
+  <level>7</level>
+  <group>authentication_failed,web,attacks,suricata,malware,intrusion_detection</group>
+  <api_key>wazuh-slack</api_key>
+  <alert_format>json</alert_format>
+</integration>
 ```
+
+## Suricata Network Intrusion Detection System
+
+### Configuration
+**File**: `/home/scott/docker/suricata/config/suricata.yaml`
+
+Suricata is configured for comprehensive network monitoring with the following features:
+
+#### Network Capture
+- **Interface**: ens18 (auto-detected primary interface)
+- **Capture Method**: AF_PACKET with memory mapping for high performance
+- **Traffic Processing**: Multi-threaded with CPU affinity optimization
+
+#### Rule Management
+- **Emerging Threats**: Automatically updated community rules
+- **Custom Rules**: Homelab-specific threat detection rules
+- **Rule Categories**: 
+  - DNS Security (suspicious TLDs, tunneling detection)
+  - Web Application Security (SQL injection, XSS, directory traversal)
+  - Command & Control Detection (C2 beacons, suspicious connections)
+  - Container Security (breakout attempts, lateral movement)
+  - Cryptocurrency Mining Detection
+  - Data Exfiltration Patterns
+
+#### Output Configuration
+```yaml
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      types:
+        - alert: {metadata: yes, tagged-packets: yes}
+        - http: {enabled: yes, extended: yes}
+        - dns: {enabled: yes, query: yes, answer: yes}
+        - tls: {enabled: yes, extended: yes}
+        - ssh: {enabled: yes}
+        - files: {enabled: yes}
+```
+
+### Custom Security Rules
+**File**: `/home/scott/docker/suricata/rules/suricata.rules`
+
+Key homelab-specific rules include:
+
+#### DNS Security Rules
+```suricata
+# Suspicious TLD monitoring
+alert dns $HOME_NET any -> any 53 (msg:"HOMELAB DNS Query to Suspicious TLD"; content:".tk"; nocase; classtype:suspicious-filename-detect; sid:1000001; rev:1;)
+
+# DNS tunneling detection  
+alert dns $HOME_NET any -> any 53 (msg:"HOMELAB DNS Tunneling Attempt - Long TXT Query"; dns_query; content:"|00 10 00 01|"; content_len:>100; classtype:trojan-activity; sid:1000003; rev:1;)
+```
+
+#### Container Security Rules
+```suricata
+# Container breakout detection
+alert tcp $HOME_NET any -> any any (msg:"HOMELAB Container Breakout Attempt"; flow:established,to_server; content:"docker.sock"; classtype:successful-admin; sid:1000040; rev:1;)
+
+# Kubernetes API access monitoring
+alert tcp $HOME_NET any -> any any (msg:"HOMELAB Kubernetes API Access"; flow:established,to_server; content:"/api/v1"; classtype:attempted-admin; sid:1000041; rev:1;)
+```
+
+### Integration with Wazuh
+**Files**: 
+- `/home/scott/docker/suricata/wazuh-integration/suricata_decoders.xml`
+- `/home/scott/docker/suricata/wazuh-integration/suricata_rules.xml`
+
+Suricata events are parsed by Wazuh using custom decoders and correlated with specific rules:
+
+#### Alert Correlation Rules
+- **Level 12-13**: Critical threats (APT behavior, successful admin access)
+- **Level 10-11**: High priority (malware detection, privilege escalation)
+- **Level 7-9**: Medium priority (suspicious domains, anomalies)
+- **Level 5-6**: Low priority (normal traffic, informational events)
+
+## Slack Real-Time Alerting
+
+### Integration Configuration
+**File**: `/home/scott/docker/wazuh-slack-integration/slack-integration.py`
+
+Real-time security notifications are sent to Slack with rich formatting:
+
+#### Alert Severity Levels
+```python
+SEVERITY_LEVELS = {
+    'critical': {'min_level': 12, 'color': '#FF0000', 'emoji': '🚨', 'mention': '@channel'},
+    'high': {'min_level': 10, 'color': '#FF8C00', 'emoji': '⚠️', 'mention': '@here'},
+    'medium': {'min_level': 7, 'color': '#FFD700', 'emoji': '⚡', 'mention': ''},
+    'low': {'min_level': 5, 'color': '#4169E1', 'emoji': 'ℹ️', 'mention': ''}
+}
+```
+
+#### Alert Categories
+- 🌐 Network Security (Suricata alerts)
+- 🛡️ Intrusion Detection
+- 🦠 Malware Detection
+- 🔑 Authentication Events
+- 🐳 Container Security
+- 🔍 DNS Security
+- 📡 Command & Control
+
+### Alert Filtering
+**File**: `/home/scott/docker/wazuh-slack-integration/alert-filters.json`
+
+Intelligent filtering prevents alert fatigue:
+- **Rate limiting**: Maximum alerts per hour by severity
+- **Time-based filtering**: Reduced sensitivity during quiet hours
+- **Rule suppression**: Known false positives excluded
+- **Source filtering**: Trusted internal IPs have different thresholds
 
 ## Pi-hole DNS Security Integration
 

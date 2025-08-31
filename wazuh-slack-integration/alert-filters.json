@@ -1,0 +1,94 @@
+{
+  "alert_filters": {
+    "description": "Configuration for filtering and customizing Slack alerts from Wazuh",
+    "severity_levels": {
+      "critical": {
+        "min_level": 12,
+        "max_alerts_per_hour": 50,
+        "immediate_notification": true,
+        "mention": "@channel"
+      },
+      "high": {
+        "min_level": 10,
+        "max_alerts_per_hour": 100,
+        "immediate_notification": true,
+        "mention": "@here"
+      },
+      "medium": {
+        "min_level": 7,
+        "max_alerts_per_hour": 200,
+        "immediate_notification": false,
+        "mention": ""
+      },
+      "low": {
+        "min_level": 5,
+        "max_alerts_per_hour": 300,
+        "immediate_notification": false,
+        "mention": ""
+      }
+    },
+    "rule_groups": {
+      "priority_groups": [
+        "authentication_failed",
+        "privilege_escalation",
+        "malware",
+        "trojan",
+        "c2",
+        "data_exfiltration",
+        "container_security"
+      ],
+      "noisy_groups": [
+        "syscheck",
+        "rootcheck",
+        "system_audit"
+      ],
+      "suppressed_rules": [
+        5503,
+        5504
+      ]
+    },
+    "time_based_filtering": {
+      "business_hours": {
+        "start": "08:00",
+        "end": "18:00",
+        "timezone": "America/New_York",
+        "increased_sensitivity": true
+      },
+      "quiet_hours": {
+        "start": "22:00",
+        "end": "06:00",
+        "critical_only": true
+      }
+    },
+    "source_filtering": {
+      "trusted_ips": [
+        "192.168.1.0/24",
+        "10.0.0.0/8"
+      ],
+      "monitored_agents": [
+        "proxmox-host",
+        "docker-host",
+        "manjaro-vm"
+      ],
+      "high_value_assets": [
+        "192.168.1.100",
+        "192.168.1.101"
+      ]
+    }
+  },
+  "formatting_options": {
+    "include_raw_data": false,
+    "max_description_length": 200,
+    "show_agent_details": true,
+    "show_network_info": true,
+    "group_similar_alerts": true,
+    "time_format": "%Y-%m-%d %H:%M:%S UTC"
+  },
+  "notification_channels": {
+    "default": "#security-alerts",
+    "critical": "#security-alerts",
+    "high": "#security-alerts", 
+    "medium": "#security-alerts",
+    "low": "#security-alerts"
+  }
+}
