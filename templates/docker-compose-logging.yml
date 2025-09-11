@@ -1,0 +1,69 @@
+# Docker Compose Logging Configuration Templates
+# Copy the appropriate logging section to your docker-compose.yml files
+
+# Standard logging configuration for most services
+# Suitable for: Web applications, APIs, databases, most general services
+standard_logging: &standard-logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "50m"
+      max-file: "5"
+
+# High-volume logging configuration
+# Suitable for: Media servers (Plex, Jellyfin), reverse proxies, download clients
+high_volume_logging: &high-volume-logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "25m"
+      max-file: "3"
+
+# Security/monitoring logging configuration  
+# Suitable for: Security tools, network monitors, SIEM components
+security_logging: &security-logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "100m"
+      max-file: "5"
+
+# Low-volume logging configuration
+# Suitable for: Simple utilities, schedulers, lightweight services
+low_volume_logging: &low-volume-logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "2"
+
+# Example usage in docker-compose.yml:
+version: '3.8'
+services:
+  
+  # Standard service example
+  web-app:
+    image: nginx:latest
+    <<: *standard-logging
+    ports:
+      - "80:80"
+  
+  # High-volume service example
+  media-server:
+    image: plexinc/pms-docker:latest
+    <<: *high-volume-logging
+    environment:
+      - PLEX_CLAIM=your-claim-token
+  
+  # Security monitoring service example
+  security-monitor:
+    image: security/monitor:latest
+    <<: *security-logging
+    cap_add:
+      - NET_ADMIN
+  
+  # Low-volume utility example
+  scheduler:
+    image: alpine:latest
+    <<: *low-volume-logging
+    command: crond -f
