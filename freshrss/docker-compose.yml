@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  freshrss:
+    image: freshrss/freshrss:latest
+    container_name: freshrss
+    restart: unless-stopped
+    ports:
+      - "8083:80"  # Using 8083 to avoid conflicts
+    volumes:
+      - ./data:/var/www/FreshRSS/data
+      - ./extensions:/var/www/FreshRSS/extensions
+    environment:
+      - CRON_MIN=1,31  # Update feeds every 30 minutes
+      - TZ=America/New_York  # Set your timezone
+    labels:
+      # For Homarr dashboard integration
+      - "homarr.group=Media & News"
+      - "homarr.name=FreshRSS"
+      - "homarr.icon=mdi-rss"
+      # For Uptime Kuma monitoring
+      - "uptime-kuma.enable=true"
+      - "uptime-kuma.name=FreshRSS"
+    networks:
+      - freshrss_default
+
+networks:
+  freshrss_default:
+    driver: bridge

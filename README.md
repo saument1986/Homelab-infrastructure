@@ -4,25 +4,34 @@
 Proxmox-based homelab featuring containerized services, network security monitoring, and isolated penetration testing environments for hands-on cybersecurity learning.
 
 ## Hardware Specifications
+
+### Main Server
 - **CPU**: AMD Ryzen 5 7600
 - **Motherboard**: Gigabyte B650M K
 - **GPU**: MSI RX6800 (with passthrough)  
 - **RAM**: 64GB
 - **PSU**: 650W
 
+### Security Edge Device
+- **Device**: Raspberry Pi 5
+- **RAM**: 4GB
+- **Purpose**: Network security monitoring and DNS filtering
+- **Location**: Network gateway for traffic inspection
+
 ## Architecture
-Running on Proxmox hypervisor with multiple VMs:
-- **Ubuntu Server** - Docker containers for services
-- **Manjaro Linux** - Primary desktop with GPU passthrough
-- **Kali Linux** - Penetration testing environment
-- **Pop!_OS** - Secondary desktop environment
+Running on Proxmox hypervisor with multiple VMs plus dedicated security monitoring:
+- **Ubuntu Server VM** - Docker containers for core services
+- **Raspberry Pi 5** - Network security monitoring (Pi-hole + Suricata)
+- **Manjaro Linux VM** - Primary desktop with GPU passthrough
+- **Kali Linux VM** - Penetration testing environment
+- **Pop!_OS VM** - Secondary desktop environment
 
 ## Current Services
 
 ### Security & Monitoring Stack
 - **Wazuh SIEM** (Port 443): Complete security information and event management with Slack integration
-- **Suricata IDS** (Host Network): Network intrusion detection and prevention system
-- **Pi-hole DNS** (Host Network): Network-wide ad blocking and DNS filtering
+- **Suricata IDS** (Raspberry Pi): Network intrusion detection and prevention system
+- **Pi-hole DNS** (Raspberry Pi): Network-wide ad blocking and DNS filtering
 - **Nessus Scanner** (Port 8834): Vulnerability assessment and compliance scanning
 - **Uptime Kuma** (Port 3001): Service availability monitoring
 - **Portainer** (Port 9000): Docker container management interface
@@ -42,6 +51,7 @@ Running on Proxmox hypervisor with multiple VMs:
 - **Tautulli** (Port 8181): Plex analytics and monitoring
 - **Dozzle** (Port 8082): Container log aggregation
 - **Homarr** - Unified dashboard
+- **FreshRSS**: RSS feed aggregator and reader
 
 ### AI & Development
 - **Ollama** - Local LLM hosting (Dolphin-Llama3:8b)
